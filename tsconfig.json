@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "declaration": true,
+    "target": "es5",
+    "removeComments": true,
+    "sourceMap": true,
+    "outDir": "lib"
+  },
+  "types": ["node"],
+  "include": ["src"],
+  "exclude": ["node_modules"]
+}

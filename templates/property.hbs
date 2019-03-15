@@ -1,0 +1,9 @@
+{{~#ifEmpty properties}}
+{{normalizeCase @key}}{{#unless isRequired}}?{{/unless}}: {{type}}{{#if isArray}}[]{{/if}};
+{{else}}
+{{normalizeCase @key}}{{#unless isRequired}}?{{/unless}}: {
+{{#each properties}}
+  {{> property}}
+{{/each}}
+}
+{{/ifEmpty~}}
