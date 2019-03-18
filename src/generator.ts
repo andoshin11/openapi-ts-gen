@@ -33,10 +33,18 @@ export default class Generator {
         path.resolve(__dirname, '../templates/definition.hbs'),
         'utf-8'
       )
+    const indexTmpl = fs.readFileSync(
+      path.resolve(__dirname, '../templates/index.hbs'),
+      'utf-8'
+    )
     const namespaceTmpl = fs.readFileSync(
         path.resolve(__dirname, '../templates/namespace.hbs'),
         'utf-8'
       )
+    const rootTmpl = fs.readFileSync(
+      path.resolve(__dirname, '../templates/root.hbs'),
+      'utf-8'
+    )
 
     // Setup dist
     if (!fs.existsSync(this.dist)) {
@@ -60,11 +68,16 @@ export default class Generator {
       ...this.createDefinitions(
         data.definitions,
         Handlebars.compile(definitionTmpl),
+        Handlebars.compile(indexTmpl),
         definitionDir
       ),
       {
         filepath: path.resolve(this.dist, `namespace.ts`),
         content: Handlebars.compile(namespaceTmpl)(data)
+      },
+      {
+        filepath: path.resolve(this.dist, 'index.ts'),
+        content: Handlebars.compile(rootTmpl)(data)
       }
     ])
   }
@@ -77,14 +90,18 @@ export default class Generator {
   private createDefinitions(
     schemas: IDefinition[],
     template: TemplateDelegate,
+    indexTemplate: TemplateDelegate,
     directory: string
   ): GenFileRequest[] {
-    return schemas.map(v => {
+    return [...schemas.map(v => {
       return {
         filepath: path.resolve(directory, `${v.name}.ts`),
         content: template(v)
       }
-    })
+    }), {
+      filepath: path.resolve(directory, `index.ts`),
+      content: indexTemplate({ schemas })
+    }]
   }
 
   parseSpec() {
