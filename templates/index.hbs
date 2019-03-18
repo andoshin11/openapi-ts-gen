@@ -2,5 +2,5 @@
 /* tslint:disable */
 /* eslint-disable */
 {{#each schemas}}
-export {{type}} from './{{type}}'
+export { default as {{ this }} } from './{{name}}'
 {{/each}}
