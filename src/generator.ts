@@ -76,7 +76,7 @@ export default class Generator {
         content: Handlebars.compile(namespaceTmpl)(data)
       },
       {
-        filepath: path.resolve(this.dist, 'index.ts'),
+        filepath: path.resolve(this.dist, 'index.d.ts'),
         content: Handlebars.compile(rootTmpl)(data)
       }
     ])
