@@ -3,6 +3,9 @@
 /* eslint-disable */
 {{#each tags}}
 {{#each this}}
+{{#if response.isRef }}
+import {{ response.type }} from './{{definitionDir}}/{{ response.type }}'
+{{/if}}
 {{#each response.properties}}
 {{#if isRef}}
 import {{type}} from './{{definitionDir}}/{{type}}'
@@ -24,13 +27,20 @@ export namespace {{namespace}} {
       {{#each requestBody.properties}}
       {{> property}}
       {{/each}}
+      {{#each queryParameter.properties}}
+      {{> property}}
+      {{/each}}
     }
 
+    {{#if response.isRef }}
+    export type {{name}}Response = {{ response.type }}
+    {{else}}
     export interface {{name}}Response {
       {{#each response.properties}}
       {{> property}}
       {{/each}}
     }
+    {{/if}}
 
     {{/each}}
   }
