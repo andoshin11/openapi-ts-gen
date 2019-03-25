@@ -11,7 +11,15 @@
     "typescript",
     "openapi"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andoshin11/openapi-ts-gen.git"
+  },
   "author": "andoshin11 <shinglish11@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/andoshin11/openapi-ts-gen/issues"
+  },
+  "homepage": "https://github.com/andoshin11/openapi-ts-gen#readme",
   "license": "MIT",
   "scripts": {
     "build": "tsc",
