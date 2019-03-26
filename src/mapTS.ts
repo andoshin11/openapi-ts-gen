@@ -25,6 +25,16 @@ export default function mapTS(schema: SchemaObject, required: boolean = false) {
     properties: {}
   }
 
+  // Has array type
+  if (schema.type === 'array') {
+    const parsed = mapTS(schema.items as SchemaObject)
+    tsSchema.type = parsed.type
+    tsSchema.isArray = true
+    tsSchema.isRef = parsed.isRef
+    tsSchema.properties = parsed.properties
+    return tsSchema
+  }
+
   // Has enum values
   if (schema.enum) {
     tsSchema.enum = schema.enum
@@ -50,16 +60,5 @@ export default function mapTS(schema: SchemaObject, required: boolean = false) {
     }
     return tsSchema
   }
-
-  // Has array type
-  if (schema.type === 'array') {
-    const parsed = mapTS(schema.items as SchemaObject)
-    tsSchema.type = parsed.type
-    tsSchema.isArray = true
-    tsSchema.isRef = parsed.isRef
-    tsSchema.properties = parsed.properties
-    return tsSchema
-  }
-
   return tsSchema
 }
