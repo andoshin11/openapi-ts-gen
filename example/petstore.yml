@@ -102,6 +102,11 @@ components:
           type: string
         tag:
           type: string
+        sex:
+          type: string
+          enum:
+            - male
+            - female
     Pets:
       type: array
       items:

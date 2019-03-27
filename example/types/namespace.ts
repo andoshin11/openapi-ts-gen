@@ -24,6 +24,5 @@ export namespace PetStore {
     }
 
     export type showPetByIdResponse = Pets
-
   }
 }

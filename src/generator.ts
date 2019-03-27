@@ -164,6 +164,15 @@ export default class Generator {
     Handlebars.registerHelper('definitionDir', () => {
       return this.definitionDir
     })
+    Handlebars.registerHelper('eq', function(v1, v2, options) {
+      if (v1 === v2) {
+        // @ts-ignore
+        return options.fn(this)
+      } else {
+        // @ts-ignore
+        return options.inverse(this)
+      }
+    })
     Handlebars.registerHelper('ne', function(v1, v2, options) {
       if (v1 !== v2) {
         // @ts-ignore

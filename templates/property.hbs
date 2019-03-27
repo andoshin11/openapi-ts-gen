@@ -1,5 +1,5 @@
 {{~#ifEmpty properties}}
-{{normalizeCase @key}}{{#unless isRequired}}?{{/unless}}: {{type}}{{#if isArray}}[]{{/if}};
+{{normalizeCase @key}}{{#unless isRequired}}?{{/unless}}: {{#if enum.length}}{{#eq type 'string'}}{{#each enum}}{{#if @first}}{{else}} | {{/if}}'{{this}}'{{/each}}{{/eq}}{{else}}{{type}}{{/if}}{{#if isArray}}[]{{/if}};
 {{else}}
 {{normalizeCase @key}}{{#unless isRequired}}?{{/unless}}: {
 {{#each properties}}
