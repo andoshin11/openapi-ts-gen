@@ -9,6 +9,9 @@ export namespace {{namespace}} {
   {{#each tags}}
   export namespace {{@key}} {
     {{#each this}}
+    {{#if requestBody.isRef }}
+    export type {{name}}Request = {{ requestBody.type }}
+    {{else}}
     export interface {{name}}Request {
       {{#each requestBody.properties}}
       {{> property}}
@@ -17,6 +20,7 @@ export namespace {{namespace}} {
       {{> property}}
       {{/each}}
     }
+    {{/if}}
 
     {{#if response.isRef }}
     export type {{name}}Response = {{ response.type }}
