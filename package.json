@@ -1,6 +1,6 @@
 {
   "name": "openapi-ts-gen",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "A type definition generator from Open API 3.0 spec.",
   "bin": {
     "openapi-ts-gen": "./bin/openapi-ts-gen.js"
