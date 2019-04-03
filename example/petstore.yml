@@ -100,6 +100,13 @@ components:
           format: int64
         name:
           type: string
+        category:
+          type: integer
+          format: int32
+          enum:
+            - 1
+            - 2
+            - 3
         tag:
           type: string
         sex:

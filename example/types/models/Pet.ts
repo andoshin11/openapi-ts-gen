@@ -5,6 +5,7 @@
 export default interface Pet {
   id: number;
   name: string;
+  category?: 1 | 2 | 3;
   tag?: string;
   sex?: 'male' | 'female';
 }
