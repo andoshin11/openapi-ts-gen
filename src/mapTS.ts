@@ -21,6 +21,7 @@ export default function mapTS(schema: SchemaObject, required: boolean = false) {
     isRequired: required,
     isArray: false,
     isRef: false,
+    isNullable: schema.nullable || false,
     enum: [],
     properties: {}
   }
