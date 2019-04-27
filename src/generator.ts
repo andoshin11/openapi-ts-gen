@@ -142,13 +142,16 @@ export default class Generator {
    */
   private registerHelper() {
     Handlebars.registerHelper('normalizeCase', (text, _) => {
+      let translated = text
       if (this.options.camelCase === true) {
-        return snakeToCamel(text)
+        translated = snakeToCamel(text)
       }
       if (this.options.camelCase === false) {
-        return camelToSnake(text)
+        translated = camelToSnake(text)
       }
-      return text
+
+      // Apply quote if needed
+      return translated.match(/-/) ? `"${translated}"` : translated
     })
     Handlebars.registerHelper('ifEmpty', function(conditional, options) {
       if (
@@ -164,6 +167,24 @@ export default class Generator {
     })
     Handlebars.registerHelper('definitionDir', () => {
       return this.definitionDir
+    })
+    Handlebars.registerHelper('eq', function(v1, v2, options) {
+      if (v1 === v2) {
+        // @ts-ignore
+        return options.fn(this)
+      } else {
+        // @ts-ignore
+        return options.inverse(this)
+      }
+    })
+    Handlebars.registerHelper('ne', function(v1, v2, options) {
+      if (v1 !== v2) {
+        // @ts-ignore
+        return options.fn(this)
+      } else {
+        // @ts-ignore
+        return options.inverse(this)
+      }
     })
   }
 

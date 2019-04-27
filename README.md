@@ -1,4 +1,4 @@
-# openapi-ts-gen [![npm version](https://badge.fury.io/js/swagpack.svg)](https://badge.fury.io/js/swagpack)
+# openapi-ts-gen [![npm version](https://badge.fury.io/js/openapi-ts-gen.svg)](https://badge.fury.io/js/openapi-ts-gen)
 A type definition generator from Open API 3.0 spec.
 
 # Install

@@ -5,7 +5,9 @@
 {{> ref}}
 {{/each}}
 {{#if schema.isRef}}
+{{#ne schema.type name}}
 import {{schema.type}} from "./{{schema.type}}";
+{{/ne}}
 {{/if}}
 
 {{#if schema.isArray}}

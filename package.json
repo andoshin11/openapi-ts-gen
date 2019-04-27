@@ -1,6 +1,6 @@
 {
   "name": "openapi-ts-gen",
-  "version": "0.0.5",
+  "version": "0.0.18",
   "description": "A type definition generator from Open API 3.0 spec.",
   "bin": {
     "openapi-ts-gen": "./bin/openapi-ts-gen.js"
@@ -11,7 +11,15 @@
     "typescript",
     "openapi"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andoshin11/openapi-ts-gen.git"
+  },
   "author": "andoshin11 <shinglish11@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/andoshin11/openapi-ts-gen/issues"
+  },
+  "homepage": "https://github.com/andoshin11/openapi-ts-gen#readme",
   "license": "MIT",
   "scripts": {
     "build": "tsc",
