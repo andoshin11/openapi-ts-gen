@@ -53,6 +53,7 @@ export default class Generator {
 
     // Register partial for handlebars
     Handlebars.registerPartial('property', this.embedded('property'))
+    Handlebars.registerPartial('ref', this.embedded('ref'))
     this.registerHelper()
 
     // Setup output directory

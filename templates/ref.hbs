@@ -1,0 +1,6 @@
+{{#if isRef}}
+import {{type}} from "./{{type}}";
+{{/if}}
+{{#each properties}}
+{{> ref}}
+{{/each}}
