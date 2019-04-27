@@ -2,11 +2,7 @@
 /* tslint:disable */
 /* eslint-disable */
 {{#each schema.properties}}
-{{#if isRef}}
-{{#ne type ../name}}
-import {{type}} from "./{{type}}";
-{{/ne}}
-{{/if}}
+{{> ref}}
 {{/each}}
 {{#if schema.isRef}}
 {{#ne schema.type name}}
