@@ -2,6 +2,7 @@ import * as Handlebars from 'handlebars'
 import { TemplateDelegate } from 'handlebars'
 import * as fs from 'fs'
 import * as path from 'path'
+import * as ejs from 'ejs'
 import { OpenAPIObject } from 'openapi3-ts'
 import { IDefinition, GenFileRequest } from './types'
 import mapTS from './mapTS'
@@ -30,17 +31,17 @@ export default class Generator {
 
     // Setup templates
     const definitionTmpl = fs.readFileSync(
-        path.resolve(__dirname, '../templates/definition.hbs'),
-        'utf-8'
-      )
+      path.resolve(__dirname, '../templates/definition.hbs'),
+      'utf-8'
+    )
     const indexTmpl = fs.readFileSync(
       path.resolve(__dirname, '../templates/index.hbs'),
       'utf-8'
     )
     const namespaceTmpl = fs.readFileSync(
-        path.resolve(__dirname, '../templates/namespace.hbs'),
-        'utf-8'
-      )
+      path.resolve(__dirname, '../templates/namespace.hbs'),
+      'utf-8'
+    )
     const rootTmpl = fs.readFileSync(
       path.resolve(__dirname, '../templates/root.hbs'),
       'utf-8'
@@ -64,12 +65,25 @@ export default class Generator {
 
     // console.log(JSON.stringify(data, null, '\t'))
 
+    // writing ejs
+    const definitionEjsPath = path.resolve(__dirname, '../templates/definition.ejs')
+    const definitionEjs = fs.readFileSync(
+      definitionEjsPath,
+      'utf-8'
+    )
+
     // Create files and write schema
     this.genFiles([
       ...this.createDefinitions(
         data.definitions,
         Handlebars.compile(definitionTmpl),
         Handlebars.compile(indexTmpl),
+        definitionDir
+      ),
+      ...this.createDefinitionsEjs(
+        data.definitions,
+        definitionEjs,
+        definitionEjsPath,
         definitionDir
       ),
       {
@@ -79,7 +93,7 @@ export default class Generator {
       {
         filepath: path.resolve(this.dist, 'index.d.ts'),
         content: Handlebars.compile(rootTmpl)(data)
-      }
+      },
     ])
   }
 
@@ -103,6 +117,23 @@ export default class Generator {
       filepath: path.resolve(directory, `index.ts`),
       content: indexTemplate({ schemas })
     }]
+  }
+
+  private createDefinitionsEjs(
+    schemas: IDefinition[],
+    template: string,
+    templatePath: string,
+    directory: string
+  ): GenFileRequest[] {
+    return [...schemas.map(v => {
+      return {
+        filepath: path.resolve(directory, `${v.name}.test.ts`),
+        content: ejs.render(template, v, {
+          filename: templatePath,
+          root: path.resolve(templatePath, '..'),
+        })
+      }
+    })]
   }
 
   parseSpec() {
@@ -153,7 +184,7 @@ export default class Generator {
       // Apply quote if needed
       return translated.match(/-/) ? `"${translated}"` : translated
     })
-    Handlebars.registerHelper('ifEmpty', function(conditional, options) {
+    Handlebars.registerHelper('ifEmpty', function (conditional, options) {
       if (
         typeof conditional === 'object' &&
         Object.keys(conditional).length === 0
@@ -168,7 +199,7 @@ export default class Generator {
     Handlebars.registerHelper('definitionDir', () => {
       return this.definitionDir
     })
-    Handlebars.registerHelper('eq', function(v1, v2, options) {
+    Handlebars.registerHelper('eq', function (v1, v2, options) {
       if (v1 === v2) {
         // @ts-ignore
         return options.fn(this)
@@ -177,7 +208,7 @@ export default class Generator {
         return options.inverse(this)
       }
     })
-    Handlebars.registerHelper('ne', function(v1, v2, options) {
+    Handlebars.registerHelper('ne', function (v1, v2, options) {
       if (v1 !== v2) {
         // @ts-ignore
         return options.fn(this)

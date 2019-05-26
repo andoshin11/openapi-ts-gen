@@ -1,0 +1,9 @@
+<%_ if (schema && schema.properties && Object.keys(schema.properties).length) { _%>
+<%= name %><%= schema.isRequired ? '' : '?' _%>: {
+<%_     Object.entries(schema.properties).forEach(([_name, _schema]) => { _%>
+    <%- include('./property', { name: _name, schema: _schema }) _%>
+<%_ }) _%>
+  }
+<%_ } else { _%>
+<%= name %><%= schema.isRequired ? '' : '?' _%>: <% if ((schema.type === 'string' || schema.type === 'number') && schema.enum.length) { const enumStr = schema.enum.map(val => schema.type === 'string' ? `'${val}'` : val).join(' | ') _%><%- enumStr _%><%_ } else { _%><%= schema.type %><%= schema.isArray ? '[]' : '' _%><%_ } _%><%= schema.isNullable ? ' | null' : '' _%>;
+<%_ }; _%>
