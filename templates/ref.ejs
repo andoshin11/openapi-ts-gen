@@ -1,8 +1,8 @@
 <%_ if (schema.isRef && schema.type !== name) { _%>
 import <%= schema.type %> from "./<%= schema.type %>";
-<%_ }; _%>
-<%_ if (schema.properties && Object.keys(schema.properties).length) { _%>
-<%_   Object.entries(schema.properties).forEach(property => { _%>
-<%-     include('/ref', { name: property[0], schema: property[1] }) _%>
-<%_   }) _%>
-<%_ }; _%>
+<%_ };
+  if (!helper.isEmpty(schema.properties)) {
+    Object.entries(schema.properties).forEach(([_name, _schema]) => { _%>
+<%-     include('/ref', { name: _name, schema: _schema }) _%>
+<%_   })
+  }; _%>
