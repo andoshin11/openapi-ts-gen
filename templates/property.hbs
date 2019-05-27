@@ -1,9 +1,0 @@
-{{~#ifEmpty properties}}
-{{{normalizeCase @key}}}{{#unless isRequired}}?{{/unless}}: {{#if enum.length}}{{#eq type 'string'}}{{#each enum}}{{#if @first}}{{else}} | {{/if}}'{{this}}'{{/each}}{{/eq}}{{#eq type 'number'}}{{#each enum}}{{#if @first}}{{else}} | {{/if}}{{this}}{{/each}}{{/eq}}{{else}}{{type}}{{/if}}{{#if isArray}}[]{{/if}}{{#if isNullable}} | null{{/if}};
-{{else}}
-{{{normalizeCase @key}}}{{#unless isRequired}}?{{/unless}}: {
-{{#each properties}}
-  {{> property}}
-{{/each}}
-}{{#if isArray}}[]{{/if}}
-{{/ifEmpty~}}

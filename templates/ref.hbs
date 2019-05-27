@@ -1,8 +1,0 @@
-{{#if isRef}}
-{{#ne type ../name}}
-import {{type}} from "./{{type}}";
-{{/ne}}
-{{/if}}
-{{#each properties}}
-{{> ref}}
-{{/each}}
