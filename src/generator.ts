@@ -1,13 +1,12 @@
-import * as Handlebars from 'handlebars'
-import { TemplateDelegate } from 'handlebars'
 import * as fs from 'fs'
 import * as path from 'path'
 import * as ejs from 'ejs'
+import * as prettier from 'prettier'
 import { OpenAPIObject } from 'openapi3-ts'
 import { IDefinition, GenFileRequest } from './types'
 import mapTS from './mapTS'
-import { snakeToCamel, camelToSnake } from './utils'
 import ParseOperations from './operation'
+import * as helper from './helper'
 
 export default class Generator {
   private definitionDir = 'models'
@@ -17,6 +16,16 @@ export default class Generator {
   constructor(spec: OpenAPIObject, options: CodeGenOptions) {
     this.spec = spec
     this.options = options
+  }
+
+  private createEjsOptions(params: { filename: string }): ejs.Options {
+    const defaultOptions = {
+      root: path.resolve(__dirname, '../templates'),
+    }
+    return {
+      ...defaultOptions,
+      ...params
+    }
   }
 
   generate() {
@@ -30,110 +39,48 @@ export default class Generator {
     const data = this.parseSpec()
 
     // Setup templates
-    const definitionTmpl = fs.readFileSync(
-      path.resolve(__dirname, '../templates/definition.hbs'),
-      'utf-8'
-    )
-    const indexTmpl = fs.readFileSync(
-      path.resolve(__dirname, '../templates/index.hbs'),
-      'utf-8'
-    )
-    const namespaceTmpl = fs.readFileSync(
-      path.resolve(__dirname, '../templates/namespace.hbs'),
-      'utf-8'
-    )
-    const rootTmpl = fs.readFileSync(
-      path.resolve(__dirname, '../templates/root.hbs'),
-      'utf-8'
-    )
+    const indexTemplate = path.resolve(__dirname, '../templates/index.ejs')
+    const definitionTemplate = path.resolve(__dirname, '../templates/definition.ejs')
+    const rootTemplate = path.resolve(__dirname, '../templates/root.ejs')
+    const namespaceTemplate = path.resolve(__dirname, '../templates/namespace.ejs')
 
     // Setup dist
     if (!fs.existsSync(this.dist)) {
       fs.mkdirSync(this.dist)
     }
 
-    // Register partial for handlebars
-    Handlebars.registerPartial('property', this.embedded('property'))
-    Handlebars.registerPartial('ref', this.embedded('ref'))
-    this.registerHelper()
-
     // Setup output directory
-    const definitionDir = path.resolve(this.dist, this.definitionDir)
-    if (data.definitions.length > 0 && !fs.existsSync(definitionDir)) {
-      fs.mkdirSync(definitionDir)
+    const definitionDirPath = path.resolve(this.dist, this.definitionDir)
+    if (data.definitions.length > 0 && !fs.existsSync(definitionDirPath)) {
+      fs.mkdirSync(definitionDirPath)
     }
 
     // console.log(JSON.stringify(data, null, '\t'))
 
-    // writing ejs
-    const definitionEjsPath = path.resolve(__dirname, '../templates/definition.ejs')
-    const definitionEjs = fs.readFileSync(
-      definitionEjsPath,
-      'utf-8'
-    )
-
     // Create files and write schema
+    const definitionNames = data.definitions.map(d => d.name)
     this.genFiles([
-      ...this.createDefinitions(
-        data.definitions,
-        Handlebars.compile(definitionTmpl),
-        Handlebars.compile(indexTmpl),
-        definitionDir
-      ),
-      ...this.createDefinitionsEjs(
-        data.definitions,
-        definitionEjs,
-        definitionEjsPath,
-        definitionDir
-      ),
+      ...data.definitions.map(definition => ({
+        filepath: path.resolve(definitionDirPath, `${definition.name}.ts`),
+        content: ejs.render(this.readFileSync(definitionTemplate), { ...definition, helper }, this.createEjsOptions({ filename: definitionTemplate })) as string
+      })),
       {
-        filepath: path.resolve(this.dist, `namespace.ts`),
-        content: Handlebars.compile(namespaceTmpl)(data)
+        filepath: path.resolve(definitionDirPath, 'index.ts'),
+        content: ejs.render(this.readFileSync(indexTemplate), { names: definitionNames }, this.createEjsOptions({ filename: indexTemplate })) as string
+      },
+      {
+        filepath: path.resolve(this.dist, 'namespace.ts'),
+        content: ejs.render(this.readFileSync(namespaceTemplate), { ...data, definitionDir: this.definitionDir, helper }, this.createEjsOptions({ filename: namespaceTemplate })) as string
       },
       {
         filepath: path.resolve(this.dist, 'index.d.ts'),
-        content: Handlebars.compile(rootTmpl)(data)
-      },
+        content: ejs.render(this.readFileSync(rootTemplate), { definitionDir: this.definitionDir }, this.createEjsOptions({ filename: rootTemplate })) as string
+      }
     ])
   }
 
-  /**
-   * Create definitions
-   * @param definitions
-   * @param template
-   */
-  private createDefinitions(
-    schemas: IDefinition[],
-    template: TemplateDelegate,
-    indexTemplate: TemplateDelegate,
-    directory: string
-  ): GenFileRequest[] {
-    return [...schemas.map(v => {
-      return {
-        filepath: path.resolve(directory, `${v.name}.ts`),
-        content: template(v)
-      }
-    }), {
-      filepath: path.resolve(directory, `index.ts`),
-      content: indexTemplate({ schemas })
-    }]
-  }
-
-  private createDefinitionsEjs(
-    schemas: IDefinition[],
-    template: string,
-    templatePath: string,
-    directory: string
-  ): GenFileRequest[] {
-    return [...schemas.map(v => {
-      return {
-        filepath: path.resolve(directory, `${v.name}.test.ts`),
-        content: ejs.render(template, v, {
-          filename: templatePath,
-          root: path.resolve(templatePath, '..'),
-        })
-      }
-    })]
+  private readFileSync(path: string): string {
+    return fs.readFileSync(path, 'utf-8')
   }
 
   parseSpec() {
@@ -160,76 +107,12 @@ export default class Generator {
    */
   private genFiles(genCodeRequests: GenFileRequest[]) {
     genCodeRequests.forEach(v => {
-      fs.writeFileSync(v.filepath, v.content, {
+      fs.writeFileSync(v.filepath, prettier.format(v.content, { parser: 'typescript' }), {
         encoding: 'utf-8',
         flag: 'w+'
       })
       console.log('Generated:', v.filepath)
     })
-  }
-
-  /**
-   * Register handlebars helpers
-   */
-  private registerHelper() {
-    Handlebars.registerHelper('normalizeCase', (text, _) => {
-      let translated = text
-      if (this.options.camelCase === true) {
-        translated = snakeToCamel(text)
-      }
-      if (this.options.camelCase === false) {
-        translated = camelToSnake(text)
-      }
-
-      // Apply quote if needed
-      return translated.match(/-/) ? `"${translated}"` : translated
-    })
-    Handlebars.registerHelper('ifEmpty', function (conditional, options) {
-      if (
-        typeof conditional === 'object' &&
-        Object.keys(conditional).length === 0
-      ) {
-        // @ts-ignore
-        return options.fn(this)
-      } else {
-        // @ts-ignore
-        return options.inverse(this)
-      }
-    })
-    Handlebars.registerHelper('definitionDir', () => {
-      return this.definitionDir
-    })
-    Handlebars.registerHelper('eq', function (v1, v2, options) {
-      if (v1 === v2) {
-        // @ts-ignore
-        return options.fn(this)
-      } else {
-        // @ts-ignore
-        return options.inverse(this)
-      }
-    })
-    Handlebars.registerHelper('ne', function (v1, v2, options) {
-      if (v1 !== v2) {
-        // @ts-ignore
-        return options.fn(this)
-      } else {
-        // @ts-ignore
-        return options.inverse(this)
-      }
-    })
-  }
-
-  /**
-   * Get embbeded template by name
-   * @param name
-   */
-  private embedded(name: string) {
-    return Handlebars.compile(
-      fs.readFileSync(
-        path.resolve(__dirname, `../templates/${name}.hbs`),
-        'utf-8'
-      )
-    )
   }
 
   /**
@@ -246,5 +129,4 @@ export default class Generator {
 export interface CodeGenOptions {
   namespace: string
   dist: string
-  camelCase?: boolean
 }
