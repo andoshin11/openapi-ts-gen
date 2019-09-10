@@ -37,6 +37,20 @@ export namespace <%= namespace %> {
           }; _%>
     }
     <% }; %>
+
+    <%_ if (operation.errors) { _%>
+      <%_ Object.entries(operation.errors).forEach(([statusCode, schema]) => { _%>
+    export interface <%= operation.name %><%= parseInt(statusCode, 10) %>Error {
+      <%_ if (schema && !helper.isEmpty(schema.properties)) { _%>
+        <%_ Object.entries(schema.properties).forEach(([ _name, _schema ]) => { _%>
+      <%- include('./property', { name: _name, schema: _schema, helper }) _%>
+        <%_ });
+          }; _%>
+
+    }
+      <%_ }); _%>
+    <% }; %>
+
     <%_ }); _%>
   }
   <%_ }); _%>
