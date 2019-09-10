@@ -1,3 +1,5 @@
+import { ErrorStatusCode } from './const'
+
 export interface TSSchema {
   type: string
   isRequired: boolean
@@ -52,11 +54,18 @@ export interface IOperation {
   queryParameter?: TSSchema
   requestBody?: TSSchema
   response?: TSSchema
+  errors?: IErrorsSchema
 }
 
 export interface IDefinition {
   name: string
   schema: TSSchema
+}
+
+export type ErrorStatusCodeType = TupleToUnion<typeof ErrorStatusCode>
+
+export type IErrorsSchema = {
+  [key in ErrorStatusCodeType]?: TSSchema
 }
 
 export interface ITag {
@@ -132,3 +141,7 @@ export interface ExternalDocs {
   url: string
   description?: string
 }
+
+
+// ------------------------------ Utility Types -------------------------------------
+type TupleToUnion<T> = T extends { [K in keyof T]: infer U } ? U : never
