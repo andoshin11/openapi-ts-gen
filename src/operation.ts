@@ -1,7 +1,8 @@
 import { OpenAPIObject, PathItemObject, OperationObject, ResponsesObject, ResponseObject, ParameterObject, RequestBodyObject, SchemaObject } from 'openapi3-ts'
-import { ITag, HTTPMethod, IOperation, TSSchema } from './types'
+import { ITag, HTTPMethod, IOperation, TSSchema, IErrorsSchema, ErrorStatusCodeType } from './types'
 import { emptySchema } from './utils'
 import mapTS from './mapTS'
+import { ErrorStatusCode } from './const'
 
 const methods: HTTPMethod[] = ['get', 'put', 'post', 'delete', 'options', 'head', 'patch']
 
@@ -33,7 +34,8 @@ export default function ParseOperations (spec: OpenAPIObject): ITag {
         response: parseResponse(operation.responses),
         pathParameter: parsePathParameter(operation.parameters as ParameterObject[]),
         queryParameter: parseQueryParameter(operation.parameters as ParameterObject[]),
-        requestBody: parseRequestBody(operation.requestBody as RequestBodyObject)
+        requestBody: parseRequestBody(operation.requestBody as RequestBodyObject),
+        errors: parseErrors(operation.responses)
       }
 
       operation.tags.forEach(tag => {
@@ -59,6 +61,34 @@ function parseResponse(responses: ResponsesObject): TSSchema {
     }
   }
   return emptySchema()
+}
+
+/**
+ * Parse response schema
+ * @param responses
+ */
+function parseErrors(responses: ResponsesObject): IErrorsSchema | undefined {
+  const errors = Object.keys(responses).filter(status => ErrorStatusCode.includes(status as ErrorStatusCodeType))
+
+  if (!errors.length) return undefined
+
+  const errorsSchema = errors.reduce((acc, ac) => {
+    const response = responses[ac] as ResponseObject | undefined
+    if (!response) return acc
+    const { content } = response
+    if (!content) return acc
+    const json = content['application/json']
+    if (!json) return acc
+    const { schema } = json
+    if (!schema) return acc
+
+    acc[ac as ErrorStatusCodeType] = mapTS(schema)
+    return acc
+  }, {} as IErrorsSchema)
+
+  console.log(JSON.stringify(errorsSchema, null, '\t'))
+
+  return errorsSchema
 }
 
 /**
