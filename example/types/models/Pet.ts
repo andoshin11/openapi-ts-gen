@@ -7,5 +7,5 @@ export default interface Pet {
   name: string;
   category?: 1 | 2 | 3;
   tag?: string;
-  sex?: 'male' | 'female';
+  sex?: "male" | "female";
 }

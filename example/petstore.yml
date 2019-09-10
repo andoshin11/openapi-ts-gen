@@ -56,6 +56,18 @@ paths:
                 properties:
                   pet:
                     $ref: "#/components/schemas/Pet"
+        '422':
+          description: Invalid parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - reason
+                properties:
+                  reason:
+                    type: string
+                    example: 'Invalid name given.'
         default:
           description: unexpected error
           content:
