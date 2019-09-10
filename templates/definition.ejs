@@ -7,7 +7,7 @@
 <%_   })
     };
     if (schema.isRef && schema.type !== name) { _%>
-import <%= schema.type _%> from "./<%= schema.type _%>";
+import <%= schema.type %> from "./<%= schema.type _%>";
 <%_ }; _%>
 
 <%_ if (schema.isArray) {
